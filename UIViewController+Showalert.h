@@ -14,7 +14,6 @@
 
 -(void)addPanGestureRecognizerToView;
 
--(UITapGestureRecognizer *)addTapWithClick:(void (^)(void))block With:(UIView *)view;
 
 -(NSString *)getUserId;
 -(NSString *)getUserPassword;
@@ -42,6 +41,10 @@
 -(NSString *)setNSDocumentDirectoryWith:(id)dict withPahtName:(NSString *)pathName;
 //读取数据从  NSDocumentDirectory
 -(id)getNSDocumentDirectoryWithPahtName:(NSString *)pathName;
+
+
+-(void)pushViewControllerWithName:(NSString *)name;
+
 /*
  //保持文字居左   图片居右
  [_button setTitleEdgeInsets:UIEdgeInsetsMake(0, -_button.imageView.frame.size.width, 0, _button.imageView.frame.size.width)];

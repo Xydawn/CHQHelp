@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="9531" systemVersion="14F1509" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9529"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="XyMenu">
+            <connections>
+                <outlet property="selectorTable" destination="8eS-eS-ZRg" id="oux-fA-0aO"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="iN0-l3-epB" customClass="XyMenu">
+            <rect key="frame" x="0.0" y="0.0" width="144" height="292"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="png_date_controller" translatesAutoresizingMaskIntoConstraints="NO" id="rfa-iQ-Jev">
+                    <rect key="frame" x="0.0" y="0.0" width="144" height="292"/>
+                </imageView>
+                <tableView clipsSubviews="YES" contentMode="scaleToFill" bounces="NO" alwaysBounceVertical="YES" style="grouped" separatorStyle="none" rowHeight="44" sectionHeaderHeight="18" sectionFooterHeight="18" translatesAutoresizingMaskIntoConstraints="NO" id="8eS-eS-ZRg">
+                    <rect key="frame" x="0.0" y="8" width="144" height="276"/>
+                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                    <connections>
+                        <outlet property="dataSource" destination="iN0-l3-epB" id="U7g-ji-YXm"/>
+                        <outlet property="delegate" destination="iN0-l3-epB" id="eRw-wh-7hS"/>
+                    </connections>
+                </tableView>
+            </subviews>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+            <constraints>
+                <constraint firstAttribute="trailing" secondItem="rfa-iQ-Jev" secondAttribute="trailing" id="BV1-2Q-9QP"/>
+                <constraint firstAttribute="bottom" secondItem="rfa-iQ-Jev" secondAttribute="bottom" id="Czq-NH-pev"/>
+                <constraint firstItem="rfa-iQ-Jev" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="HzK-Jf-akK"/>
+                <constraint firstItem="8eS-eS-ZRg" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="Io3-e5-Ko7"/>
+                <constraint firstItem="rfa-iQ-Jev" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="Tf3-xo-ITz"/>
+                <constraint firstItem="8eS-eS-ZRg" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" constant="8" id="Yhc-bM-Yh7"/>
+                <constraint firstAttribute="trailing" secondItem="8eS-eS-ZRg" secondAttribute="trailing" id="bR5-KB-RiR"/>
+                <constraint firstAttribute="bottom" secondItem="8eS-eS-ZRg" secondAttribute="bottom" constant="8" id="ejO-f1-0Fo"/>
+            </constraints>
+            <nil key="simulatedStatusBarMetrics"/>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <point key="canvasLocation" x="293" y="449"/>
+        </view>
+    </objects>
+    <resources>
+        <image name="png_date_controller" width="166" height="290"/>
+    </resources>
+</document>

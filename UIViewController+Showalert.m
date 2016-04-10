@@ -9,8 +9,9 @@
 #import "UIViewController+Showalert.h"
 #import <objc/runtime.h>
 #import "LZXHelper.h"
+#import "GDataXMLElement+util.h"
+#import "XyCachesManager.h"
 typedef void(^ActionBlock) (void);
-static char key;
 @implementation UIViewController (Showalert)
 -(UIAlertView *)showOnAlertViewWithTitle:(NSString *)title msg:(NSString *)msg{
     UIAlertView *alert =[ [UIAlertView alloc]initWithTitle:title message:msg delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
@@ -36,18 +37,6 @@ static char key;
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
--(UITapGestureRecognizer *)addTapWithClick:(void (^)(void))block With:(UIView *)view{
-    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(actionClick:)];
-    objc_setAssociatedObject(view, &key, block, OBJC_ASSOCIATION_COPY_NONATOMIC);
-    [view addGestureRecognizer:tap];
-    return tap;
-}
--(void)actionClick:(UITapGestureRecognizer *)tap{
-    ActionBlock block = objc_getAssociatedObject(tap.view, &key);
-    if (block) {
-        block();
-    }
-}
 
 -(AFHTTPRequestOperationManager *)shareManger{
     static AFHTTPRequestOperationManager *manger = nil;
@@ -184,6 +173,8 @@ static char key;
     
     [MBProgressHUD showHUDAddedTo:self.view animated:YES];
     
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
+    
     AFHTTPRequestOperationManager *manager = [self shareManger];
     
     
@@ -216,12 +207,14 @@ static char key;
             [collView reloadData];
         }
         [MBProgressHUD hideAllHUDsForView:weakSelf.view animated:YES];
+        [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         if (collView) {
             [collView footerEndRefreshing];
             [collView headerEndRefreshing];
         }
         [MBProgressHUD hideAllHUDsForView:weakSelf.view animated:YES];
+        [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
         CHQLog(@"%@",error);
         [weakSelf showHint:@"请求异常"];
     }];
@@ -233,6 +226,9 @@ static char key;
 -(void)getDownloadWith:(NSString *)url With:(void(^)(id dict))succeed andDefeated:(void(^)(id dict))defeated with:(NSDictionary *)head{
     
     
+    
+    
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
     [MBProgressHUD showHUDAddedTo:self.view animated:YES];
     
     
@@ -245,21 +241,15 @@ static char key;
         if (responseObject) {
             CHQLog(@"url+++++++%@",operation.request);
             CHQLog(@"%@",responseObject);
-            NSString * status =responseObject[@"head"][@"status"];
-            
-            if ([status isEqualToString:@"success"]) {
-                succeed(responseObject[@"body"]);
-                
-            }else{
-                NSString *message = responseObject[@"head"][@"msg"];
-                [weakSelf showHint:message];
-                defeated(responseObject[@"body"]);
+       
+            if (succeed) {
+                succeed(responseObject );
             }
-            
         }else{
             [weakSelf showHint:@"请求异常"];
         }
         [MBProgressHUD hideHUDForView:weakSelf.view animated:YES];
+        [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         [MBProgressHUD hideHUDForView:weakSelf.view animated:YES];
         CHQLog(@"%@",error);
@@ -269,6 +259,7 @@ static char key;
             void(^errorBlock)(void) =objc_getAssociatedObject(weakSelf, @"errorBlock");
             errorBlock();
         }
+        [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
     }];
     
 }
@@ -299,18 +290,6 @@ static char key;
             NSData *data=[[NSData alloc]init];
             data=[NSKeyedArchiver archivedDataWithRootObject:responseObject];
             [data writeToFile:[LZXHelper getFullPathWithFile:url] atomically:YES];
-            NSString * status =[responseObject[@"head"][@"status"] stringValue];
-            
-       
-            
-            if ([status isEqualToString:@"success"]) {
-                succeed(responseObject[@"body"]);
-                
-            }else{
-                NSString *message = responseObject[@"head"][@"msg"];
-                [weakSelf showHint:message];
-                defeated(responseObject[@"body"]);
-            }
             
         }else{
             [weakSelf showHint:@"请求异常"];
@@ -353,17 +332,6 @@ static char key;
             CHQLog(@"url+++++++%@",operation.request);
             CHQLog(@"%@",responseObject);
             
-            NSString * status =responseObject[@"head"][@"status"]  ;
-        
-            
-            if ([status isEqualToString:@"success"]) {
-                succeed(responseObject[@"body"]);
-                
-            }else{
-                NSString *message = responseObject[@"head"][@"msg"];
-                [weakSelf showHint:message];
-                defeated(responseObject[@"body"]);
-            }
             
         }else{
             
@@ -399,7 +367,7 @@ static char key;
 }
 -(NSString *)getUserPassword{
     NSString *password = [[NSUserDefaults standardUserDefaults]objectForKey:@"userpassword"];
-    return  [password md5sum];
+    return  password;
 }
 
 //缓存处理
@@ -423,22 +391,19 @@ static char key;
 
 //存储数据到 NSDocumentDirectory
 -(NSString *)setNSDocumentDirectoryWith:(id)dict withPahtName:(NSString *)pathName{
-    NSArray *arr = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,NSAllDomainsMask, YES);
-    NSString *path = [arr objectAtIndex:0];
-    NSString *pStr = [path stringByAppendingString:pathName];
-    NSData *data=[[NSData alloc]init];
-    data=[NSKeyedArchiver archivedDataWithRootObject:dict];
-    [data writeToFile:pStr atomically:YES];
-    return pStr;
+
+    return [XyCachesManager setNSDocumentDirectoryWith:dict withPahtName:pathName];
 }
 //读取数据到 NSDocumentDirectory
 -(id)getNSDocumentDirectoryWithPahtName:(NSString *)pathName{
-    NSArray *arr = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,NSAllDomainsMask, YES);
-    NSString *path = [arr objectAtIndex:0];
-    NSString *pStr = [path stringByAppendingString:pathName];
-    NSData *data1=[NSData dataWithContentsOfFile:pStr];
-    return [NSKeyedUnarchiver unarchiveObjectWithData:data1];
+    return [XyCachesManager getNSDocumentDirectoryWithPahtName:pathName];
 }
 
+
+-(void)pushViewControllerWithName:(NSString *)name{
+    UIViewController *vc = [[NSClassFromString(name) alloc]init];
+    vc.hidesBottomBarWhenPushed = YES;
+    [self.navigationController pushViewController:vc animated:YES];
+}
 
 @end
